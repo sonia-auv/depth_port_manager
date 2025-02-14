@@ -2,7 +2,7 @@
 
 #include <std_msgs/msg/float32.hpp>
 #include <std_srvs/srv/empty.hpp>
-#include <sonia_common_cpp/SerialConn.h>
+#include <sonia_common_cpp/SerialConn.hpp>
 
 #include <stdio.h>
 #include <string>
