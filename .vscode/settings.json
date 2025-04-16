@@ -62,5 +62,35 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "bit": "cpp"
-    }
+    },
+    "python.autoComplete.extraPaths": [
+        "/home/sawali/ros_sonia_ws2/install/rqt_actuator/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/sonia_common_ros2/local/lib/python3.10/dist-packages",
+        "/home/sawali/ros_sonia_ws2/install/sonia_common_py/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_waypoint/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_toolbar/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_thruster_effort/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_thruster_control/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_power/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_dvl/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_depth_indicator/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_console/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/sawali/ros_sonia_ws2/install/rqt_actuator/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/sonia_common_ros2/local/lib/python3.10/dist-packages",
+        "/home/sawali/ros_sonia_ws2/install/sonia_common_py/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_waypoint/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_toolbar/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_thruster_effort/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_thruster_control/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_power/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_dvl/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_depth_indicator/lib/python3.10/site-packages",
+        "/home/sawali/ros_sonia_ws2/install/rqt_console/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
 }
