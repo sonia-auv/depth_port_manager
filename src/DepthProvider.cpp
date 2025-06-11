@@ -40,7 +40,7 @@ namespace depth_provider
     void DepthProvider::readSerialDevice()
     {
         char buffer[BUFFER_SIZE];
-
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
         while (!_read_stop_thread)
         {
             do
