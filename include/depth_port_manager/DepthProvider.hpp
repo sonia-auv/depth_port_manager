@@ -3,12 +3,12 @@
 #include <std_msgs/msg/float32.hpp>
 #include <std_srvs/srv/empty.hpp>
 #include <sonia_common_cpp/SerialConn.hpp>
+#include <sonia_common_cpp/SharedQueue.hpp>
 
 #include <stdio.h>
 #include <string>
 #include <thread>
 #include "rclcpp/rclcpp.hpp"
-#include "SharedQueue.h"
 
 #define ID1 "ISDPT"
 
@@ -20,16 +20,15 @@ namespace depth_provider
             DepthProvider();
             ~DepthProvider();
             bool OpenPort();
-        private:            
+        private:  
+        
+            sonia_common_cpp::SharedQueue<std::string> id1_string;
+            
             bool _read_stop_thread=false;
             std::thread read_thread;
 
             bool _send_stop_thread=false;
             std::thread send_thread;
-
-            std::mutex id1_mutex;
-            std::string id1_string = "";
-            std::condition_variable id1_cond;
 
             void readSerialDevice();
             void sendId1Register();

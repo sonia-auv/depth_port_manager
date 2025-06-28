@@ -1,6 +1,6 @@
 #include <sstream>
 #include "boost/log/trivial.hpp"
-#include "depth_port_manager/DepthProvider.h"
+#include "depth_port_manager/DepthProvider.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -40,7 +40,7 @@ namespace depth_provider
     void DepthProvider::readSerialDevice()
     {
         char buffer[BUFFER_SIZE];
-
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
         while (!_read_stop_thread)
         {
             do
@@ -64,9 +64,7 @@ namespace depth_provider
 
             if(!strncmp(&buffer[1], ID1, 5)) // Add checksum verification
             {
-                std::unique_lock<std::mutex> mlock(id1_mutex);
-                id1_string = std::string(buffer);
-                id1_cond.notify_one();
+                id1_string.push_back((std::string)buffer);
             }
 
         } // end while
@@ -78,14 +76,10 @@ namespace depth_provider
         {
             std::string tmp = "";
 
-            std::unique_lock<std::mutex> mlock(id1_mutex);
-            id1_cond.wait(mlock);
-
-            try
-            {
-                if (!id1_string.empty())
+            while(!id1_string.empty()){
+                try
                 {
-                    std::stringstream ss(id1_string);
+                    std::stringstream ss(id1_string.get_n_pop_front());
 
                     std::getline(ss, tmp, ','); // Get the header of the message
 
@@ -104,14 +98,13 @@ namespace depth_provider
                     std::getline(ss, tmp, ','); // Get the temperature
                     temp_.data = stof(tmp);
                     tempPublisher_->publish(temp_);
+                    
                 }
-            }
-            catch(...)
-            {
-                BOOST_LOG_TRIVIAL(info)<<"Depth sensor : Bad packet error";
-            }
-            
-            
+                catch(...)
+                {
+                    BOOST_LOG_TRIVIAL(info)<<"Depth sensor : Bad packet error";
+                }
+            }            
         }
     }
 
