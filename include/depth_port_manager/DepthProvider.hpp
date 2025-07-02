@@ -1,7 +1,7 @@
 #pragma once
 
 #include <std_msgs/msg/float32.hpp>
-#include <std_srvs/srv/empty.hpp>
+#include <std_srvs/srv/trigger.hpp>
 #include <sonia_common_cpp/SerialConn.hpp>
 #include <sonia_common_cpp/SharedQueue.hpp>
 
@@ -45,7 +45,7 @@ namespace depth_provider
             std_msgs::msg::Float32 press_;
             std_msgs::msg::Float32 temp_;
 
-            bool tare(const std::shared_ptr<std_srvs::srv::Empty::Request> request, std::shared_ptr<std_srvs::srv::Empty::Response> response);
-            rclcpp::Service<std_srvs::srv::Empty>::SharedPtr tare_srv;
+            void tare(const std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+            rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr tare_srv;
     };
 }
