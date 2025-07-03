@@ -113,6 +113,7 @@ namespace depth_provider
         _serialConnection.Transmit("#tare\n");
         std::this_thread::sleep_for(0.1s);
         response->success=true;
+        response->message= "Depth Sensor tared";
         BOOST_LOG_TRIVIAL(info)<<"Depth Sensor tare finished";
     }
 } // end namespace
