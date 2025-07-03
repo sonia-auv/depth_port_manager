@@ -18,7 +18,7 @@ namespace depth_provider
         read_thread = std::thread(std::bind(&DepthProvider::readSerialDevice, this));
         send_thread = std::thread(std::bind(&DepthProvider::sendId1Register, this));
 
-        tare_srv = this->create_service<std_srvs::srv::Empty>("/provider_depth/tare", std::bind(&DepthProvider::tare, this, _1, _2));
+        tare_srv = this->create_service<std_srvs::srv::Trigger>("/provider_depth/tare", std::bind(&DepthProvider::tare, this, _1, _2));
     }
 
     DepthProvider::~DepthProvider()
@@ -108,12 +108,12 @@ namespace depth_provider
         }
     }
 
-    bool DepthProvider::tare(const std::shared_ptr<std_srvs::srv::Empty::Request> request, std::shared_ptr<std_srvs::srv::Empty::Response> response)
+    void DepthProvider::tare(const std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
         _serialConnection.Transmit("#tare\n");
         std::this_thread::sleep_for(0.1s);
-
+        response->success=true;
+        response->message= "Depth Sensor tared";
         BOOST_LOG_TRIVIAL(info)<<"Depth Sensor tare finished";
-        return true;
     }
 } // end namespace
