@@ -1,15 +1,14 @@
-#include "depth_port_manager/DepthProvider.hpp"
 #include <stdlib.h>
-#include <iostream>
-#include <chrono>
+
+#include "depth_port_manager/DepthProvider.hpp"
 
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    auto depth= std::make_shared<depth_provider::DepthProvider>();
-    
+    auto depth = std::make_shared<depth_port_manager::DepthProvider>();
+
     if (!depth->OpenPort())
-    {   
+    {
         std::cout << "Could not open port..." << std::endl;
         return EXIT_FAILURE;
     }
