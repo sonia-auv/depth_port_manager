@@ -1,7 +1,8 @@
 #include "depth_port_manager/ImpactSubsea.hpp"
+
+#include <boost/log/trivial.hpp>
 #include <cstring>
 #include <sstream>
-#include <boost/log/trivial.hpp>
 #include <thread>
 using namespace std::chrono_literals;
 
@@ -36,7 +37,8 @@ namespace depth_port_manager
         return false;
     }
 
-    DepthData ImpactSubsea::ParseData(std::string data) {
+    DepthData ImpactSubsea::ParseData(std::string data)
+    {
         DepthData returnVal;
         std::string tmp = "";
         try
@@ -59,11 +61,12 @@ namespace depth_port_manager
         {
             BOOST_LOG_TRIVIAL(info) << "Depth sensor : Bad packet error";
         }
-        
+
         return returnVal;
     }
 
-    void ImpactSubsea::Tare(std::function<ssize_t(std::string)> writeFunc) {
+    void ImpactSubsea::Tare(std::function<ssize_t(std::string)> writeFunc)
+    {
         writeFunc("#tare\n");
         std::this_thread::sleep_for(0.1s);
     }

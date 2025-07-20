@@ -9,7 +9,8 @@ using namespace std::chrono_literals;
 
 namespace depth_port_manager
 {
-    DepthProvider::DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn) : Node("depth_provider"), _device(device), _connection(conn)
+    DepthProvider::DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn)
+        : Node("depth_provider"), _device(device), _connection(conn)
     {
         _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", 100);
         _pressPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", 100);
@@ -46,10 +47,8 @@ namespace depth_port_manager
         while (!_readStopThread)
         {
             if (_device.ReadDataCheck(
-                [&](uint8_t *pData, int offset)->ssize_t {
-                    return _connection.ReadOnce(pData, offset);
-                },
-                buffer, BUFFER_SIZE))
+                    [&](uint8_t* pData, int offset) -> ssize_t { return _connection.ReadOnce(pData, offset); }, buffer,
+                    BUFFER_SIZE))
             {
                 _id1String.push_back((std::string)buffer);
             }
@@ -84,11 +83,7 @@ namespace depth_port_manager
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
         (void)request;
-        _device.Tare(
-            [&](std::string data) -> ssize_t {
-                return _connection.Transmit(data);
-            }
-        );
+        _device.Tare([&](std::string data) -> ssize_t { return _connection.Transmit(data); });
         response->success = true;
         response->message = "Depth Sensor tared";
         BOOST_LOG_TRIVIAL(info) << "Depth Sensor tare finished";
