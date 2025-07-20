@@ -48,7 +48,7 @@ namespace depth_port_manager
         {
             if (_device.ReadDataCheck(
                     [&](uint8_t* pData, int offset) -> ssize_t { return _connection.ReadOnce(pData, offset); }, buffer,
-                    BUFFER_SIZE))
+                    BUFFER_SIZE) > 0)
             {
                 _id1String.push_back((std::string)buffer);
             }

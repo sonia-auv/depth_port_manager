@@ -8,10 +8,9 @@ namespace depth_port_manager
         public:
         ImpactSubsea()=default;
         ~ImpactSubsea()=default;
-        bool ReadDataCheck(std::function<ssize_t(uint8_t *, int)> readFunc, char buffer[], int bufferSize) override;
+        int ReadDataCheck(std::function<ssize_t(uint8_t *, int)> readFunc, char buffer[], int bufferSize) override;
         DepthData ParseData(std::string data) override;
         void Tare(std::function<ssize_t(std::string)> writeFunc) override;
-        private:
         static const int ID_SIZE = 5;
         static const std::string ID1;
     };

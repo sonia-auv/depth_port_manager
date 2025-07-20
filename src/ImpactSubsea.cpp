@@ -10,12 +10,10 @@ namespace depth_port_manager
 {
     const std::string ImpactSubsea::ID1 = "ISDPT";
 
-    bool ImpactSubsea::ReadDataCheck(std::function<ssize_t(uint8_t *, int)> readFunc, char buffer[], int bufferSize)
+    int ImpactSubsea::ReadDataCheck(std::function<ssize_t(uint8_t *, int)> readFunc, char buffer[], int bufferSize)
     {
-        do
-        {
-            readFunc((uint8_t *)buffer, 0);
-        } while (buffer[0] != '$');
+        readFunc((uint8_t *)buffer, 0);
+        if (buffer[0] != '$') {return 0;};
         int index;
 
         for (index = 1; buffer[index - 1] != '\n' && index < bufferSize; index++)
@@ -25,16 +23,16 @@ namespace depth_port_manager
 
         if (index >= bufferSize)
         {
-            return false;
+            return -1;
         }
 
         buffer[index] = 0;
 
         if (strncmp(&buffer[1], ImpactSubsea::ID1.c_str(), ImpactSubsea::ID_SIZE) == 0)  // Add checksum verification
         {
-            return true;
+            return index;
         }
-        return false;
+        return -2;
     }
 
     DepthData ImpactSubsea::ParseData(std::string data)
