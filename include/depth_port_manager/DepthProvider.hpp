@@ -9,8 +9,8 @@
 #include <string>
 #include <thread>
 
-#include "rclcpp/rclcpp.hpp"
 #include "depth_port_manager/IDepthDevice.hpp"
+#include "rclcpp/rclcpp.hpp"
 namespace depth_port_manager
 {
     class DepthProvider : public rclcpp::Node
@@ -18,7 +18,6 @@ namespace depth_port_manager
         public:
         DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn);
         ~DepthProvider();
-        bool OpenPort();
 
         private:
         void readSerialDevice();
@@ -36,18 +35,13 @@ namespace depth_port_manager
         bool _sendStopThread = false;
         std::thread _sendThread;
 
-        
+
         sonia_common_cpp::SerialConn& _connection;
-        
+
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _depthPublisher;
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pressPublisher;
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _tempPublisher;
-        
-        std_msgs::msg::Float32 _depth;
-        std_msgs::msg::Float32 _press;
-        std_msgs::msg::Float32 _temp;
-        
-        
+
         rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _tareSrv;
         static const int BUFFER_SIZE = 4096;
         static const int ID_SIZE = 5;

@@ -29,17 +29,6 @@ namespace depth_port_manager
         _readStopThread = true;
     }
 
-    bool DepthProvider::OpenPort()
-    {
-        // TODO: lets see how this will work when the super class is created for connections.
-        bool res = this->_connection.OpenPort();
-        if (res)
-        {
-            _connection.Flush();
-        }
-        return res;
-    }
-
     void DepthProvider::readSerialDevice()
     {
         char buffer[BUFFER_SIZE];

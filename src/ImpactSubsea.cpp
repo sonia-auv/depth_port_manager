@@ -13,7 +13,10 @@ namespace depth_port_manager
     int ImpactSubsea::ReadDataCheck(std::function<ssize_t(uint8_t *, int)> readFunc, char buffer[], int bufferSize)
     {
         readFunc((uint8_t *)buffer, 0);
-        if (buffer[0] != '$') {return 0;};
+        if (buffer[0] != '$')
+        {
+            return 0;
+        };
         int index;
 
         for (index = 1; buffer[index - 1] != '\n' && index < bufferSize; index++)
