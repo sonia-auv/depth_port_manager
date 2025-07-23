@@ -1,119 +1,80 @@
-#include <sstream>
-#include "boost/log/trivial.hpp"
+// #include <sstream>
 #include "depth_port_manager/DepthProvider.hpp"
+
+#include <boost/log/trivial.hpp>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
 using namespace std::chrono_literals;
 
-namespace depth_provider
+namespace depth_port_manager
 {
-    DepthProvider::DepthProvider()
-        : Node("depth_provider"), _serialConnection("/dev/DEPTH", B115200, true)
+    DepthProvider::DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn)
+        : Node("depth_provider"), _device(device), _connection(conn)
     {
-        depthPublisher_ = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", 100);
-        pressPublisher_ = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", 100);
-        tempPublisher_ = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/temp", 100);
+        _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", 100);
+        _pressPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", 100);
+        _tempPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/temp", 100);
 
-        read_thread = std::thread(std::bind(&DepthProvider::readSerialDevice, this));
-        send_thread = std::thread(std::bind(&DepthProvider::sendId1Register, this));
+        _readThread = std::thread(std::bind(&DepthProvider::readSerialDevice, this));
+        _sendThread = std::thread(std::bind(&DepthProvider::sendId1Register, this));
 
-        tare_srv = this->create_service<std_srvs::srv::Trigger>("/provider_depth/tare", std::bind(&DepthProvider::tare, this, _1, _2));
+        _tareSrv = this->create_service<std_srvs::srv::Trigger>("/provider_depth/tare",
+                                                                std::bind(&DepthProvider::tare, this, _1, _2));
     }
 
     DepthProvider::~DepthProvider()
     {
-        _send_stop_thread = true;
-        _read_stop_thread = true;
-    }
-
-    bool DepthProvider::OpenPort()
-    {
-        bool res = _serialConnection.OpenPort();
-        if (res)
-        {
-            _serialConnection.Flush();
-        }
-        return res;
+        _sendStopThread = true;
+        _readStopThread = true;
     }
 
     void DepthProvider::readSerialDevice()
     {
         char buffer[BUFFER_SIZE];
-	std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        while (!_read_stop_thread)
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        while (!_readStopThread)
         {
-            do
-            {   
-                _serialConnection.ReadOnce((uint8_t*)buffer,0);
-            } while (buffer[0] != '$');
-
-            int i;
-
-            for (i = 1; buffer[i - 1] != '\n' && i < BUFFER_SIZE; i++)
+            if (_device.ReadDataCheck(
+                    [&](uint8_t* pData, int offset) -> ssize_t { return _connection.ReadOnce(pData, offset); }, buffer,
+                    BUFFER_SIZE) > 0)
             {
-                _serialConnection.ReadOnce((uint8_t *)buffer, i);
+                _id1String.push_back((std::string)buffer);
             }
-
-            if (i >= BUFFER_SIZE)
-            {
-                continue;
-            }
-
-            buffer[i] = 0;
-
-            if(!strncmp(&buffer[1], ID1, 5)) // Add checksum verification
-            {
-                id1_string.push_back((std::string)buffer);
-            }
-
-        } // end while
-    }     // end read
+        }  // end while
+    }      // end read
 
     void DepthProvider::sendId1Register()
     {
-        while (!_send_stop_thread)
+        while (!_sendStopThread)
         {
             std::string tmp = "";
 
-            while(!id1_string.empty()){
-                try
-                {
-                    std::stringstream ss(id1_string.get_n_pop_front());
+            while (!_id1String.empty())
+            {
+                DepthData data = _device.ParseData(_id1String.get_n_pop_front());
 
-                    std::getline(ss, tmp, ','); // Get the header of the message
+                std_msgs::msg::Float32 publishData;
 
-                    std::getline(ss, tmp, ','); // Get the depth
-                    depth_.data = stof(tmp);
-                    depthPublisher_->publish(depth_);
+                publishData.data = data.depth;
+                _depthPublisher->publish(publishData);
 
-                    std::getline(ss, tmp, ','); // skip M
+                publishData.data = data.temp;
+                _tempPublisher->publish(publishData);
 
-                    std::getline(ss, tmp, ','); // Get the pressure
-                    press_.data = stof(tmp);
-                    pressPublisher_->publish(press_);
-
-                    std::getline(ss, tmp, ','); // skip B
-                    
-                    std::getline(ss, tmp, ','); // Get the temperature
-                    temp_.data = stof(tmp);
-                    tempPublisher_->publish(temp_);
-                    
-                }
-                catch(...)
-                {
-                    BOOST_LOG_TRIVIAL(info)<<"Depth sensor : Bad packet error";
-                }
-            }            
+                publishData.data = data.press;
+                _pressPublisher->publish(publishData);
+            }
         }
     }
 
-    void DepthProvider::tare(const std::shared_ptr<std_srvs::srv::Trigger::Request> request, std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+    void DepthProvider::tare(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+                             std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
-        _serialConnection.Transmit("#tare\n");
-        std::this_thread::sleep_for(0.1s);
-        response->success=true;
-        response->message= "Depth Sensor tared";
-        BOOST_LOG_TRIVIAL(info)<<"Depth Sensor tare finished";
+        (void)request;
+        _device.Tare([&](std::string data) -> ssize_t { return _connection.Transmit(data); });
+        response->success = true;
+        response->message = "Depth Sensor tared";
+        BOOST_LOG_TRIVIAL(info) << "Depth Sensor tare finished";
     }
-} // end namespace
+}  // namespace depth_port_manager
