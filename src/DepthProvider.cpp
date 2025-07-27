@@ -12,7 +12,10 @@ namespace depth_port_manager
     DepthProvider::DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn)
         : Node("depth_provider"), _device(device), _connection(conn)
     {
-        _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", 100);
+        rclcpp::QoS qos(10);
+        qos.reliable();
+
+        _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", qos);
         _pressPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", 100);
         _tempPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/temp", 100);
 

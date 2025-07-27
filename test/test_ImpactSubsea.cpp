@@ -85,7 +85,7 @@ TEST(ParseData, parseID123)
                        '6', ',', 'M', ',', '7', '8', '9', '.', '0', '1', '2', '3',  ',', 'B',
                        ',', '2', '3', '.', '4', '5', ',', 'C', '*', 'x', 'x', '\n', '\0'};
     ASSERT_EQ(device.ParseData(buffer), output);
-};
+}
 
 TEST(Tare, expectedTareCmd)
 {
