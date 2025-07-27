@@ -44,6 +44,7 @@ namespace depth_port_manager
             {
                 _id1String.push_back((std::string)buffer);
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }  // end while
     }      // end read
 
