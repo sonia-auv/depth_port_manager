@@ -12,9 +12,13 @@ namespace depth_port_manager
     DepthProvider::DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn)
         : Node("depth_provider"), _device(device), _connection(conn)
     {
-        _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", 100);
-        _pressPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", 100);
-        _tempPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/temp", 100);
+        //Setting Quality of service policy
+        rclcpp::QoS qos_pub_info(10);
+        qos_pub_info.reliability(rclcpp::ReliabilityPolicy::BestEffort).durability(rclcpp::DurabilityPolicy::Volatile).history(rclcpp::HistoryPolicy::KeepLast);
+
+        _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", qos_pub_info);
+        _pressPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", qos_pub_info);
+        _tempPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/temp", qos_pub_info);
 
         _readThread = std::thread(std::bind(&DepthProvider::readSerialDevice, this));
         _sendThread = std::thread(std::bind(&DepthProvider::sendId1Register, this));
@@ -41,6 +45,7 @@ namespace depth_port_manager
             {
                 _id1String.push_back((std::string)buffer);
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }  // end while
     }      // end read
 
