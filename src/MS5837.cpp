@@ -5,8 +5,11 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
-
+#include <thread>
 #include "sonia_common_cpp/I2CConn.hpp"
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 namespace depth_port_manager
 {
@@ -18,7 +21,8 @@ namespace depth_port_manager
         tram.size = 0;
         int success = _conn->Transmit(tram);
         std::cout << "RESET Request sent" << std::endl;
-	usleep(10000);
+        std::this_thread::sleep_for(10ms);
+	    // usleep(10000);
 
         uint8_t res[64];
         // Read calibration values and CRC
