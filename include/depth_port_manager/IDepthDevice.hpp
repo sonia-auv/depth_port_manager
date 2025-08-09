@@ -26,7 +26,10 @@ namespace depth_port_manager
     class IDepthDevice
     {
         public:
-        inline IDepthDevice(std::shared_ptr<sonia_common_cpp::IConnection> connection) : _conn(connection) {};
+        IDepthDevice(std::shared_ptr<sonia_common_cpp::IConnection> connection)
+        {
+            _conn = connection;
+        };
         virtual int ReadDataCheck(char buffer[], int bufferSize) = 0;
         virtual DepthData ParseData(std::string data) = 0;
         virtual void Tare() = 0;

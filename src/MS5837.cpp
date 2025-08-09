@@ -5,11 +5,13 @@
 #include <stdexcept>
 #include <cmath>
 #include "sonia_common_cpp/I2CConn.hpp"
+#include <iostream>
 
 namespace depth_port_manager
 {
-    MS5837::MS5837(std::shared_ptr<sonia_common_cpp::IConnection> connection) : IDepthDevice(connection)
+    MS5837::MS5837(std::shared_ptr<sonia_common_cpp::IConnection> connection) : IDepthDevice(std::move(connection))
     {
+        std::cout << "Starting ctor of MS3837" << std::endl;
         sonia_common_cpp::I2CTram tram;
         tram.cmd = MS5837_RESET;
         tram.size = 0;
