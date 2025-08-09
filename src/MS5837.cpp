@@ -16,7 +16,8 @@ namespace depth_port_manager
         tram.cmd = MS5837_RESET;
         tram.size = 0;
         int success = _conn->Transmit(tram);
-        usleep(10000);
+        std::cout << "RESET Request sent" << std::endl;
+	usleep(10000);
 
         uint8_t res[64];
         // Read calibration values and CRC
@@ -26,7 +27,7 @@ namespace depth_port_manager
             tram.size = 2;
             tram.data.assign(res, res + (uint8_t)tram.size);
             success += _conn->Transmit(tram);
-            C[i] = (res[0] << 8) | res[1];
+            C[i] = (tram.data.at(0) << 8) | tram.data.at(1);
         }
 
         // Verify that data is correct with CRC
@@ -35,7 +36,7 @@ namespace depth_port_manager
         if (crcCalculated != crcRead)
         {
             std::string err = "CRC Failed with " + success;
-            throw std::runtime_error(err);
+            throw std::runtime_error("CRC Failed");
         }
         cptTemp = 50;
     }
