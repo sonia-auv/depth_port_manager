@@ -4,15 +4,23 @@
 #include <cstring>
 #include <sstream>
 #include <thread>
+
+#include "sonia_common_cpp/SerialConn.hpp"
 using namespace std::chrono_literals;
 
 namespace depth_port_manager
 {
     const std::string ImpactSubsea::ID1 = "ISDPT";
 
-    int ImpactSubsea::ReadDataCheck(std::function<ssize_t(uint8_t *, int)> readFunc, char buffer[], int bufferSize)
+    ImpactSubsea::ImpactSubsea(std::shared_ptr<sonia_common_cpp::IConnection> connection)
+        : IDepthDevice(connection)
+    {}
+
+    int ImpactSubsea::ReadDataCheck(char buffer[], int bufferSize)
     {
-        readFunc((uint8_t *)buffer, 0);
+        sonia_common_cpp::SerialTram tram;
+        tram.size = 1;
+        _conn->Read(tram);
         if (buffer[0] != '$')
         {
             return 0;
@@ -21,7 +29,8 @@ namespace depth_port_manager
 
         for (index = 1; buffer[index - 1] != '\n' && index < bufferSize; index++)
         {
-            readFunc((uint8_t *)buffer, index);
+            tram.offset = index;
+            _conn->Read(tram);
         }
 
         if (index >= bufferSize)
@@ -29,6 +38,7 @@ namespace depth_port_manager
             return -1;
         }
 
+        buffer = (char *)tram.data.data();
         buffer[index] = 0;
 
         if (strncmp(&buffer[1], ImpactSubsea::ID1.c_str(), ImpactSubsea::ID_SIZE) == 0)  // Add checksum verification
@@ -66,9 +76,12 @@ namespace depth_port_manager
         return returnVal;
     }
 
-    void ImpactSubsea::Tare(std::function<ssize_t(std::string)> writeFunc)
+    void ImpactSubsea::Tare()
     {
-        writeFunc("#tare\n");
+        sonia_common_cpp::SerialTram tram;
+        std::string msg = "#tare\n";
+        tram.data.assign(msg.begin(), msg.end());
+        _conn->Transmit(tram);
         std::this_thread::sleep_for(0.1s);
     }
 }  // namespace depth_port_manager

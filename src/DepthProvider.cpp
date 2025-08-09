@@ -9,12 +9,13 @@ using namespace std::chrono_literals;
 
 namespace depth_port_manager
 {
-    DepthProvider::DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn)
-        : Node("depth_provider"), _device(device), _connection(conn)
+    DepthProvider::DepthProvider(std::shared_ptr<IDepthDevice> device) : Node("depth_provider"), _device(device)
     {
-        //Setting Quality of service policy
+        // Setting Quality of service policy
         rclcpp::QoS qos_pub_info(10);
-        qos_pub_info.reliability(rclcpp::ReliabilityPolicy::BestEffort).durability(rclcpp::DurabilityPolicy::Volatile).history(rclcpp::HistoryPolicy::KeepLast);
+        qos_pub_info.reliability(rclcpp::ReliabilityPolicy::BestEffort)
+            .durability(rclcpp::DurabilityPolicy::Volatile)
+            .history(rclcpp::HistoryPolicy::KeepLast);
 
         _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", qos_pub_info);
         _pressPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", qos_pub_info);
@@ -39,15 +40,13 @@ namespace depth_port_manager
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         while (!_readStopThread)
         {
-            if (_device.ReadDataCheck(
-                    [&](uint8_t* pData, int offset) -> ssize_t { return _connection.ReadOnce(pData, offset); }, buffer,
-                    BUFFER_SIZE) > 0)
+            if (_device->ReadDataCheck(buffer, BUFFER_SIZE) > 0)
             {
                 _id1String.push_back((std::string)buffer);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }  // end while
-    }      // end read
+    }  // end read
 
     void DepthProvider::sendId1Register()
     {
@@ -57,7 +56,7 @@ namespace depth_port_manager
 
             while (!_id1String.empty())
             {
-                DepthData data = _device.ParseData(_id1String.get_n_pop_front());
+                DepthData data = _device->ParseData(_id1String.get_n_pop_front());
 
                 std_msgs::msg::Float32 publishData;
 
@@ -77,7 +76,7 @@ namespace depth_port_manager
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
         (void)request;
-        _device.Tare([&](std::string data) -> ssize_t { return _connection.Transmit(data); });
+        _device->Tare();
         response->success = true;
         response->message = "Depth Sensor tared";
         BOOST_LOG_TRIVIAL(info) << "Depth Sensor tare finished";

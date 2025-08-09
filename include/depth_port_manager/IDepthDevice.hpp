@@ -5,6 +5,9 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <memory>
+
+#include "sonia_common_cpp/IConnection.hpp"
 
 namespace depth_port_manager
 {
@@ -23,8 +26,12 @@ namespace depth_port_manager
     class IDepthDevice
     {
         public:
-        virtual int ReadDataCheck(std::function<ssize_t(uint8_t*, int)> readFunc, char buffer[], int bufferSize) = 0;
+        inline IDepthDevice(std::shared_ptr<sonia_common_cpp::IConnection> connection) : _conn(connection) {};
+        virtual int ReadDataCheck(char buffer[], int bufferSize) = 0;
         virtual DepthData ParseData(std::string data) = 0;
-        virtual void Tare(std::function<ssize_t(std::string)> writeFunc) = 0;
+        virtual void Tare() = 0;
+
+        protected:
+        std::shared_ptr<sonia_common_cpp::IConnection> _conn;
     };
 }  // namespace depth_port_manager
