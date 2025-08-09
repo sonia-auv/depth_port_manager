@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
     std::cout << "Got Env" << std::endl;
     std::shared_ptr<sonia_common_cpp::IConnection> conn;
     std::cout << "Create Empty vars" << std::endl;
-    std::shared_ptr<depth_port_manager::IDepthDevice> device;
     if (strcmp(env_var, "LITE1") == 0)
     {
         conn = std::make_shared<sonia_common_cpp::I2CConn>("/dev/i2c-8", 0x76);
@@ -35,7 +34,8 @@ int main(int argc, char *argv[])
         RCLCPP_FATAL(rclcpp::get_logger("depth_port_manager"), "Could not open port...");
         return EXIT_FAILURE;
     }
-
+    
+    std::shared_ptr<depth_port_manager::IDepthDevice> device;
     if (strcmp(env_var, "LITE1") == 0)
     {
         device = std::make_shared<depth_port_manager::MS5837>(conn);

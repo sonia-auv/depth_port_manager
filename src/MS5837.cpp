@@ -2,10 +2,11 @@
 
 #include <fcntl.h>
 
-#include <stdexcept>
 #include <cmath>
-#include "sonia_common_cpp/I2CConn.hpp"
 #include <iostream>
+#include <stdexcept>
+
+#include "sonia_common_cpp/I2CConn.hpp"
 
 namespace depth_port_manager
 {
@@ -111,10 +112,7 @@ namespace depth_port_manager
         return ret_data;
     }
 
-    void MS5837::Tare()
-    {
-        throw std::runtime_error("Not implemented now");
-    }
+    void MS5837::Tare() { throw std::runtime_error("Not implemented now"); }
 
     void MS5837::calculate()
     {
@@ -142,22 +140,22 @@ namespace depth_port_manager
 
         // Second order compensation
         if ((TEMP / 100) < 20)
-            {  // Low temp
-                Ti = (3 * int64_t(dT) * int64_t(dT)) / (8589934592LL);
-                OFFi = (3 * (TEMP - 2000) * (TEMP - 2000)) / 2;
-                SENSi = (5 * (TEMP - 2000) * (TEMP - 2000)) / 8;
-                if ((TEMP / 100) < -15)
-                {  // Very low temp
-                    OFFi = OFFi + 7 * (TEMP + 1500l) * (TEMP + 1500l);
-                    SENSi = SENSi + 4 * (TEMP + 1500l) * (TEMP + 1500l);
-                }
+        {  // Low temp
+            Ti = (3 * int64_t(dT) * int64_t(dT)) / (8589934592LL);
+            OFFi = (3 * (TEMP - 2000) * (TEMP - 2000)) / 2;
+            SENSi = (5 * (TEMP - 2000) * (TEMP - 2000)) / 8;
+            if ((TEMP / 100) < -15)
+            {  // Very low temp
+                OFFi = OFFi + 7 * (TEMP + 1500l) * (TEMP + 1500l);
+                SENSi = SENSi + 4 * (TEMP + 1500l) * (TEMP + 1500l);
             }
-            else if ((TEMP / 100) >= 20)
-            {  // High temp
-                Ti = 2 * (dT * dT) / (137438953472LL);
-                OFFi = (1 * (TEMP - 2000) * (TEMP - 2000)) / 16;
-                SENSi = 0;
-            }
+        }
+        else if ((TEMP / 100) >= 20)
+        {  // High temp
+            Ti = 2 * (dT * dT) / (137438953472LL);
+            OFFi = (1 * (TEMP - 2000) * (TEMP - 2000)) / 16;
+            SENSi = 0;
+        }
 
         OFF2 = OFF - OFFi;  // Calculate pressure and temp second order
         SENS2 = SENS - SENSi;
@@ -167,62 +165,79 @@ namespace depth_port_manager
         P = (((D1_pres * SENS2) / 2097152l - OFF2) / 8192l);
     }
 
-    float MS5837::pressure(float conversion) {
-		return P*conversion/10.0f;
-	}
+    float MS5837::pressure(float conversion) { return P * conversion / 10.0f; }
 
-	float MS5837::temperature() {
-		return TEMP/100.0f;
-	}
+    float MS5837::temperature() { return TEMP / 100.0f; }
 
-	// The pressure sensor measures absolute pressure, so it will measure the atmospheric pressure + water pressure
-	// We subtract the atmospheric pressure to calculate the depth with only the water pressure
-	// The average atmospheric pressure of 101300 pascal is used for the calcuation, but atmospheric pressure varies
-	// If the atmospheric pressure is not 101300 at the time of reading, the depth reported will be offset
-	// In order to calculate the correct depth, the actual atmospheric pressure should be measured once in air, and
-	// that value should subtracted for subsequent depth calculations.
-	float MS5837::depth() {
-		return (pressure(MS5837::Pa)-101300)/(_fluidDensity*9.80665);
-	}
+    // The pressure sensor measures absolute pressure, so it will measure the atmospheric pressure + water pressure
+    // We subtract the atmospheric pressure to calculate the depth with only the water pressure
+    // The average atmospheric pressure of 101300 pascal is used for the calcuation, but atmospheric pressure varies
+    // If the atmospheric pressure is not 101300 at the time of reading, the depth reported will be offset
+    // In order to calculate the correct depth, the actual atmospheric pressure should be measured once in air, and
+    // that value should subtracted for subsequent depth calculations.
+    float MS5837::depth() { return (pressure(MS5837::Pa) - 101300) / (_fluidDensity * 9.80665); }
 
-	float MS5837::altitude() {
-		return (1-pow((pressure()/1013.25),.190284))*145366.45*.3048;
-	}
+    float MS5837::altitude() { return (1 - pow((pressure() / 1013.25), .190284)) * 145366.45 * .3048; }
 
 
-    uint8_t MS5837::crc4(uint16_t n_prom[])
+    // uint8_t MS5837::crc4(uint16_t n_prom[])
+    // {
+    //     uint16_t n_rem = 0;
+
+    //     n_prom[0] = ((n_prom[0]) & 0x0FFF);
+    //     n_prom[7] = 0;
+
+    //     for (uint8_t i = 0; i < 16; i++)
+    //     {
+    //         if (i % 2 == 1)
+    //         {
+    //             n_rem ^= (uint16_t)((n_prom[i >> 1]) & 0x00FF);
+    //         }
+    //         else
+    //         {
+    //             n_rem ^= (uint16_t)(n_prom[i >> 1] >> 8);
+    //         }
+    //         for (uint8_t n_bit = 8; n_bit > 0; n_bit--)
+    //         {
+    //             if (n_rem & 0x8000)
+    //             {
+    //                 n_rem = (n_rem << 1) ^ 0x3000;
+    //             }
+    //             else
+    //             {
+    //                 n_rem = (n_rem << 1);
+    //             }
+    //         }
+    //     }
+
+    //     n_rem = ((n_rem >> 12) & 0x000F);
+
+    //     return n_rem ^ 0x00;
+    // }
+
+    uint8_t crc4(uint16_t n_prom[])  // n_prom defined as 8x unsigned int (n_prom[8])
     {
-        uint16_t n_rem = 0;
-
-        n_prom[0] = ((n_prom[0]) & 0x0FFF);
-        n_prom[7] = 0;
-
-        for (uint8_t i = 0; i < 16; i++)
-        {
-            if (i % 2 == 1)
-            {
-                n_rem ^= (uint16_t)((n_prom[i >> 1]) & 0x00FF);
-            }
+        int cnt;                 // simple counter
+        unsigned int n_rem = 0;  // crc remainder
+        unsigned char n_bit;
+        n_prom[0] = ((n_prom[0]) & 0x0FFF);  // CRC byte is replaced by 0
+        n_prom[7] = 0;                       // Subsidiary value, set to 0
+        for (cnt = 0; cnt < 16; cnt++)       // operation is performed on bytes
+        {                                    // choose LSB or MSB
+            if (cnt % 2 == 1)
+                n_rem ^= (unsigned short)((n_prom[cnt >> 1]) & 0x00FF);
             else
+                n_rem ^= (unsigned short)(n_prom[cnt >> 1] >> 8);
+            for (n_bit = 8; n_bit > 0; n_bit--)
             {
-                n_rem ^= (uint16_t)(n_prom[i >> 1] >> 8);
-            }
-            for (uint8_t n_bit = 8; n_bit > 0; n_bit--)
-            {
-                if (n_rem & 0x8000)
-                {
+                if (n_rem & (0x8000))
                     n_rem = (n_rem << 1) ^ 0x3000;
-                }
                 else
-                {
                     n_rem = (n_rem << 1);
-                }
             }
         }
-
-        n_rem = ((n_rem >> 12) & 0x000F);
-
-        return n_rem ^ 0x00;
+        n_rem = ((n_rem >> 12) & 0x000F);  // final 4-bit remainder is CRC code
+        return (n_rem ^ 0x00);
     }
 
 }  // namespace depth_port_manager
