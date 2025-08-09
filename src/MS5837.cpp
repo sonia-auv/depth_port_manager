@@ -215,7 +215,7 @@ namespace depth_port_manager
     //     return n_rem ^ 0x00;
     // }
 
-    uint8_t crc4(uint16_t n_prom[])  // n_prom defined as 8x unsigned int (n_prom[8])
+    uint8_t MS5837::crc4(uint16_t n_prom[])  // n_prom defined as 8x unsigned int (n_prom[8])
     {
         int cnt;                 // simple counter
         unsigned int n_rem = 0;  // crc remainder
