@@ -31,13 +31,14 @@ namespace depth_port_manager
             tram.cmd = MS5837_PROM_READ + i * 2;
             tram.size = 2;
             tram.data.assign(res, res + (uint8_t)tram.size);
-            success += _conn->Transmit(tram);
+            success += _conn->Read(tram);
             C[i] = (tram.data.at(0) << 8) | tram.data.at(1);
         }
 
         // Verify that data is correct with CRC
         uint8_t crcRead = C[0] >> 12;
         uint8_t crcCalculated = crc4(C);
+	std::cout << "CRC shoud be " << (int)crcRead << " and the calculated value is " << (int)crcCalculated << std::endl;
         if (crcCalculated != crcRead)
         {
             std::string err = "CRC Failed with " + success;
@@ -135,9 +136,9 @@ namespace depth_port_manager
         // Terms called
         dT = D2_temp - uint32_t(C[5]) * 256l;
 
-        SENS = int64_t(C[1]) * 32768l + (int64_t(C[3]) * dT) / 256l;
-        OFF = int64_t(C[2]) * 65536l + (int64_t(C[4]) * dT) / 128l;
-        P = (D1_pres * SENS / (2097152l) - OFF) / (8192l);
+        SENS = int64_t(C[1]) * 65536l + (int64_t(C[3]) * dT) / 128l;
+        OFF = int64_t(C[2]) * 131072l + (int64_t(C[4]) * dT) / 64l;
+        P = (D1_pres * SENS / (2097152l) - OFF) / (32768l);
 
         // Temp conversion
         TEMP = 2000l + int64_t(dT) * C[6] / 8388608LL;
@@ -145,20 +146,9 @@ namespace depth_port_manager
         // Second order compensation
         if ((TEMP / 100) < 20)
         {  // Low temp
-            Ti = (3 * int64_t(dT) * int64_t(dT)) / (8589934592LL);
-            OFFi = (3 * (TEMP - 2000) * (TEMP - 2000)) / 2;
-            SENSi = (5 * (TEMP - 2000) * (TEMP - 2000)) / 8;
-            if ((TEMP / 100) < -15)
-            {  // Very low temp
-                OFFi = OFFi + 7 * (TEMP + 1500l) * (TEMP + 1500l);
-                SENSi = SENSi + 4 * (TEMP + 1500l) * (TEMP + 1500l);
-            }
-        }
-        else if ((TEMP / 100) >= 20)
-        {  // High temp
-            Ti = 2 * (dT * dT) / (137438953472LL);
-            OFFi = (1 * (TEMP - 2000) * (TEMP - 2000)) / 16;
-            SENSi = 0;
+            Ti = (11 * int64_t(dT) * int64_t(dT)) / (34359738368LL);
+            OFFi = (31 * (TEMP - 2000) * (TEMP - 2000)) / 8;
+            SENSi = (63 * (TEMP - 2000) * (TEMP - 2000)) / 32;
         }
 
         OFF2 = OFF - OFFi;  // Calculate pressure and temp second order
@@ -166,10 +156,10 @@ namespace depth_port_manager
 
         TEMP = (TEMP - Ti);
 
-        P = (((D1_pres * SENS2) / 2097152l - OFF2) / 8192l);
+        P = (((D1_pres * SENS2) / 2097152l - OFF2) / 32768l);
     }
 
-    float MS5837::pressure(float conversion) { return P * conversion / 10.0f; }
+    float MS5837::pressure(float conversion) { return P * conversion / 100.0f; }
 
     float MS5837::temperature() { return TEMP / 100.0f; }
 

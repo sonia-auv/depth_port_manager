@@ -13,7 +13,7 @@ namespace depth_port_manager
     {
         // Setting Quality of service policy
         rclcpp::QoS qos_pub_info(10);
-        qos_pub_info.reliability(rclcpp::ReliabilityPolicy::BestEffort)
+        qos_pub_info.reliability(rclcpp::ReliabilityPolicy::Reliable)
             .durability(rclcpp::DurabilityPolicy::Volatile)
             .history(rclcpp::HistoryPolicy::KeepLast);
 
