@@ -69,6 +69,7 @@ namespace depth_port_manager
                 publishData.data = data.press;
                 _pressPublisher->publish(publishData);
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 

@@ -52,5 +52,7 @@ namespace depth_port_manager
         uint8_t _model;
 
         float _fluidDensity = 1029;
+
+        float _tarePressure = 101300;
     };
 }  // namespace depth_port_manager

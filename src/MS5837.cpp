@@ -117,7 +117,13 @@ namespace depth_port_manager
         return ret_data;
     }
 
-    void MS5837::Tare() { throw std::runtime_error("Not implemented now"); }
+    void MS5837::Tare() { 
+        //function to get initial value for tare, all number is just to be working
+        char buffer[64];
+        ReadDataCheck(buffer, 64);
+        ParseData(buffer);
+        _tarePressure = pressure(MS5837::Pa);
+    }
 
     void MS5837::calculate()
     {
@@ -169,7 +175,7 @@ namespace depth_port_manager
     // If the atmospheric pressure is not 101300 at the time of reading, the depth reported will be offset
     // In order to calculate the correct depth, the actual atmospheric pressure should be measured once in air, and
     // that value should subtracted for subsequent depth calculations.
-    float MS5837::depth() { return (pressure(MS5837::Pa) - 101300) / (_fluidDensity * 9.80665); }
+    float MS5837::depth() { return (pressure(MS5837::Pa) - _tarePressure) / (_fluidDensity * 9.80665); }
 
     float MS5837::altitude() { return (1 - pow((pressure() / 1013.25), .190284)) * 145366.45 * .3048; }
 
