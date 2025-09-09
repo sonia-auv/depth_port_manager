@@ -14,7 +14,7 @@ namespace depth_port_manager
     {
         //Setting Quality of service policy
         rclcpp::QoS qos_pub_info(10);
-        qos_pub_info.reliability(rclcpp::ReliabilityPolicy::BestEffort).durability(rclcpp::DurabilityPolicy::Volatile).history(rclcpp::HistoryPolicy::KeepLast);
+        qos_pub_info.reliability(rclcpp::ReliabilityPolicy::Reliable);
 
         _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", qos_pub_info);
         _pressPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", qos_pub_info);
@@ -31,6 +31,8 @@ namespace depth_port_manager
     {
         _sendStopThread = true;
         _readStopThread = true;
+        _mtxParser.unlock();
+        _cvReaderParser.notify_all();
     }
 
     void DepthProvider::readSerialDevice()
@@ -44,6 +46,7 @@ namespace depth_port_manager
                     BUFFER_SIZE) > 0)
             {
                 _id1String.push_back((std::string)buffer);
+                _cvReaderParser.notify_all();
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }  // end while
@@ -51,25 +54,25 @@ namespace depth_port_manager
 
     void DepthProvider::sendId1Register()
     {
+
+        std::unique_lock<std::mutex> _lockParser(_mtxParser);
         while (!_sendStopThread)
         {
             std::string tmp = "";
 
-            while (!_id1String.empty())
-            {
-                DepthData data = _device.ParseData(_id1String.get_n_pop_front());
+            _cvReaderParser.wait(_lockParser, [&] { return !_id1String.empty(); });
+            DepthData data = _device.ParseData(_id1String.get_n_pop_front());
 
-                std_msgs::msg::Float32 publishData;
+            std_msgs::msg::Float32 publishData;
 
-                publishData.data = data.depth;
-                _depthPublisher->publish(publishData);
+            publishData.data = data.depth;
+            _depthPublisher->publish(publishData);
 
-                publishData.data = data.temp;
-                _tempPublisher->publish(publishData);
+            publishData.data = data.temp;
+            _tempPublisher->publish(publishData);
 
-                publishData.data = data.press;
-                _pressPublisher->publish(publishData);
-            }
+            publishData.data = data.press;
+            _pressPublisher->publish(publishData);
         }
     }
 
