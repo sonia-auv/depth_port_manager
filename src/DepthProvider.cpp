@@ -23,8 +23,7 @@ namespace depth_port_manager
         _readThread = std::thread(std::bind(&DepthProvider::readSerialDevice, this));
         _sendThread = std::thread(std::bind(&DepthProvider::sendId1Register, this));
 
-        _tareSrv = this->create_service<std_srvs::srv::Trigger>("/provider_depth/tare",
-                                                                std::bind(&DepthProvider::tare, this, _1, _2));
+        _tareSrv = this->create_service<std_srvs::srv::Trigger>("/provider_depth/tare", std::bind(&DepthProvider::tare, this, _1, _2));
     }
 
     DepthProvider::~DepthProvider()
@@ -50,16 +49,13 @@ namespace depth_port_manager
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }  // end while
-    }      // end read
+    }// end read
 
     void DepthProvider::sendId1Register()
     {
-
         std::unique_lock<std::mutex> _lockParser(_mtxParser);
         while (!_sendStopThread)
         {
-            std::string tmp = "";
-
             _cvReaderParser.wait(_lockParser, [&] { return !_id1String.empty(); });
             DepthData data = _device.ParseData(_id1String.get_n_pop_front());
 
@@ -83,6 +79,6 @@ namespace depth_port_manager
         _device.Tare([&](std::string data) -> ssize_t { return _connection.Transmit(data); });
         response->success = true;
         response->message = "Depth Sensor tared";
-        BOOST_LOG_TRIVIAL(info) << "Depth Sensor tare finished";
+        BOOST_LOG_TRIVIAL(info) << "Depth Sensor tare completed";
     }
 }  // namespace depth_port_manager
