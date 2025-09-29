@@ -40,15 +40,20 @@ namespace depth_port_manager
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
         while (!_readStopThread)
         {
-            if (_device.ReadDataCheck(
-                    [&](uint8_t* pData, int offset) -> ssize_t { return _connection.ReadOnce(pData, offset); }, buffer,
-                    BUFFER_SIZE) > 0)
-            {
-                _id1String.push_back((std::string)buffer);
-                _cvReaderParser.notify_all();
+            try{
+                if (_device.ReadDataCheck(
+                        [&](uint8_t* pData, int offset) -> ssize_t { return _connection.ReadOnce(pData, offset); }, buffer,
+                        BUFFER_SIZE) > 0)
+                {
+                    _id1String.push_back((std::string)buffer);
+                    _cvReaderParser.notify_all();
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }  // end while
+            catch (...){
+                BOOST_LOG_TRIVIAL(info) << "Depth sensor : Failed readDataCheck";
+            }
+        }// end while
     }// end read
 
     void DepthProvider::sendId1Register()
