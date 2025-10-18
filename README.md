@@ -1,7 +1,5 @@
 # depth_port_manager
 
-## Project Description
-
 *Project description*
 
 ---
@@ -24,10 +22,10 @@
 
 ## Node
 
-Name: `depth_provider`
-Port Name: `/dev/DEPTH`
-Port type: serial
-Baud Rate: 115200
+* Name: `depth_provider`
+* Port Name: `/dev/DEPTH`
+* Port type: serial
+* Baud Rate: 115200
 
 ---
 
