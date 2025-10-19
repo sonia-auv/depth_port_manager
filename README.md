@@ -37,9 +37,9 @@ The project enables a serial connection with the depth sensor **Impact Subsea IS
 
 | Type                             | Name                      | Direction       | Message/Service Type    | Description                                 |
 | -------------------------------- | ------------------------- | ----------------| ----------------------- | ------------------------------------------- |
-| Topic                            | `/provider_depth/depth`   | Published       | `std_msgs/msg/Float32`  | Raw detected depth data                     |
-| Topic                            | `/provider_depth/press`   | Published       | `std_msgs/msg/Float32`  | Raw detected pressure data                  |
-| Topic                            | `/provider_depth/temp`    | Published       | `std_msgs/msg/Float32`  | Raw detected temperature data               | 
+| Topic                            | `/provider_depth/depth`   | Published       | `std_msgs/msg/Float32`  | Measured depth data                     |
+| Topic                            | `/provider_depth/press`   | Published       | `std_msgs/msg/Float32`  | Measured pressure data                  |
+| Topic                            | `/provider_depth/temp`    | Published       | `std_msgs/msg/Float32`  | MEasured temperature data               | 
 | Service                          | `/provider_depth/tare`    | Service Server  | `std_srvs/srv/Trigger`  | Resets the depth sensor to current position |
 
 ---
@@ -58,12 +58,6 @@ source install/setup.bash
 
 ```bash
 ros2 launch depth_port_manager launch.py
-```
-
-### Alternative launch
-
-```bash
-ros2 run depth_port_manager depth_port_manager
 ```
 
 ---
