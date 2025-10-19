@@ -1,6 +1,6 @@
 # depth_port_manager
 
-*Project description*
+The project enables a serial connection with the depth sensor **Impact Subsea ISD4000** for data transmission. The connection reads raw measurement data which is then parsed into depth, pressure, and temperature and then transmitted using **ROS2** communication to other systems on the network.
 
 ---
 
@@ -14,9 +14,13 @@
 
 * `ament_cmake`
 * `rclcpp`
-* `sonia_common_cpp`
 * `std_msgs`
 * `std_srvs`
+
+### Additional packages
+
+* `Boost`
+* `sonia_common_cpp`
 
 ---
 
