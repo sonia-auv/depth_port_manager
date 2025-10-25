@@ -75,7 +75,6 @@ ros2 param list /depth_port_manager
 
 ## References
 
-* [ROS 2 Humble Documentation](https://docs.ros.org/en/humble/)
 * [sonia_common_ros2](https://github.com/sonia-auv/sonia_common_ros2)
 * [ImpactSubsea ISD4000 manual](https://www.impactsubsea.co.uk/wp-content/uploads/2020/01/ISD4000-Manual-Rev-1.7.pdf)
 
