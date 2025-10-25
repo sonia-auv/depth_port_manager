@@ -17,10 +17,13 @@ The project enables a serial connection with the depth sensor **Impact Subsea IS
 * `std_msgs`
 * `std_srvs`
 
-### Additional packages
+### Sonia packages
+
+* `sonia_common_cpp`
+
+### External packages
 
 * `Boost`
-* `sonia_common_cpp`
 
 ---
 
