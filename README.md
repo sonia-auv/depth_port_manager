@@ -53,6 +53,7 @@ To build the project, the following commands should be run directly from your RO
 colcon build --packages-select depth_port_manager --symlink-install
 source install/setup.bash
 ```
+
 ---
 
 ## Launch Instructions
@@ -79,6 +80,7 @@ ros2 param list /depth_port_manager
 ## References
 
 * [sonia_common_ros2](https://github.com/sonia-auv/sonia_common_ros2)
-* [ImpactSubsea ISD4000 manual](https://www.impactsubsea.co.uk/wp-content/uploads/2020/01/ISD4000-Manual-Rev-1.7.pdf)
+* [ImpactSubsea ISD4000](https://www.impactsubsea.co.uk/isd4000/)
+* [ImpactSubsea ISD4000 manual](https://www.impactsubsea.co.uk/wp-content/uploads/2025/09/ISD4000-Manual-Rev-2.9.pdf)
 
 ---
