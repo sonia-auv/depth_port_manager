@@ -10,7 +10,6 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sonia_common_cpp REQUIRED)
-find_package(sonia_common_ros2 REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(std_msgs REQUIRED)
 
@@ -47,7 +46,7 @@ install(TARGETS
 
 target_compile_options(${PROJECT_NAME} PUBLIC -Wall -Wextra -Wpedantic -Werror)
 
-set(DEPS rclcpp Boost sonia_common_cpp sonia_common_ros2 std_msgs std_srvs)
+set(DEPS rclcpp Boost sonia_common_cpp std_msgs std_srvs)
 
 ament_target_dependencies(${PROJECT_NAME} ${DEPS})
 
