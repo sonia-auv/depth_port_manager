@@ -58,6 +58,14 @@ source install/setup.bash
 
 ## Launch Instructions
 
+### Environment variables
+Required environment variables to launch the project
+
+```bash
+export AUV={prototype_identifier}
+```
+replace `{prototype_identifier}` with available options: `AUV8` | `LITE1`.
+
 ### Default launch
 
 ```bash
