@@ -19,11 +19,16 @@ namespace depth_port_manager
         _depthPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/depth", qos_pub_info);
         _pressPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/press", qos_pub_info);
         _tempPublisher = this->create_publisher<std_msgs::msg::Float32>("/provider_depth/temp", qos_pub_info);
+        _nodeStatusPublisher = this->create_publisher<sonia_common_ros2::msg::NodeStatus>("/system_monitor/node_status",1);
 
         _readThread = std::thread(std::bind(&DepthProvider::readSerialDevice, this));
         _sendThread = std::thread(std::bind(&DepthProvider::sendId1Register, this));
 
+        _timerNodeStatus = this->create_wall_timer(500ms, std::bind(&DepthProvider::publishStatus, this));
         _tareSrv = this->create_service<std_srvs::srv::Trigger>("/provider_depth/tare", std::bind(&DepthProvider::tare, this, _1, _2));
+
+        _nodeStatus.quality = sonia_common_ros2::msg::NodeStatus::Q_OK;
+        _nodeStatus.state = sonia_common_ros2::msg::NodeStatus::STATE_RUNNING;
     }
 
     DepthProvider::~DepthProvider()
@@ -48,9 +53,11 @@ namespace depth_port_manager
                     _id1String.push_back((std::string)buffer);
                     _cvReaderParser.notify_all();
                 }
+                _nodeStatus.quality = sonia_common_ros2::msg::NodeStatus::Q_OK;
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
             catch (...){
+                _nodeStatus.quality = sonia_common_ros2::msg::NodeStatus::Q_WARN;
                 BOOST_LOG_TRIVIAL(info) << "Depth sensor : Failed readDataCheck";
             }
         }// end while
@@ -85,5 +92,11 @@ namespace depth_port_manager
         response->success = true;
         response->message = "Depth Sensor tared";
         BOOST_LOG_TRIVIAL(info) << "Depth Sensor tare completed";
+    }
+
+    void DepthProvider::publishStatus(){
+        _nodeStatus.node_name = this->get_name();
+        _nodeStatus.stamp = this->get_clock().get()->now();
+        _nodeStatusPublisher->publish(_nodeStatus);
     }
 }  // namespace depth_port_manager

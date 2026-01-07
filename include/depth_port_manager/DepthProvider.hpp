@@ -12,6 +12,7 @@
 #include <condition_variable>
 
 #include "depth_port_manager/IDepthDevice.hpp"
+#include "sonia_common_ros2/msg/node_status.hpp"
 #include "rclcpp/rclcpp.hpp"
 namespace depth_port_manager
 {
@@ -22,6 +23,7 @@ namespace depth_port_manager
         ~DepthProvider();
 
         private:
+        void publishStatus();
         void readSerialDevice();
         void sendId1Register();
         void tare(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
@@ -43,7 +45,9 @@ namespace depth_port_manager
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _depthPublisher;
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pressPublisher;
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _tempPublisher;
+        rclcpp::Publisher<sonia_common_ros2::msg::NodeStatus>::SharedPtr _nodeStatusPublisher;
 
+        rclcpp::TimerBase::SharedPtr _timerNodeStatus;
         rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _tareSrv;
         static const int BUFFER_SIZE = 4096;
         static const int ID_SIZE = 5;
@@ -52,5 +56,6 @@ namespace depth_port_manager
         std::mutex _mtxParser;
         std::condition_variable _cvReaderParser;
         sonia_common_cpp::SharedQueue<uint8_t> _parseQueue;
+        sonia_common_ros2::msg::NodeStatus _nodeStatus;
     };
 }  // namespace depth_port_manager
