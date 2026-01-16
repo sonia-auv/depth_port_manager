@@ -27,6 +27,7 @@ namespace depth_port_manager
         _timerNodeStatus = this->create_wall_timer(500ms, std::bind(&DepthProvider::publishStatus, this));
         _tareSrv = this->create_service<std_srvs::srv::Trigger>("/provider_depth/tare", std::bind(&DepthProvider::tare, this, _1, _2));
 
+        _nodeStatus.node_name = this->get_name();
         _nodeStatus.quality = sonia_common_ros2::msg::NodeStatus::Q_OK;
         _nodeStatus.state = sonia_common_ros2::msg::NodeStatus::STATE_RUNNING;
     }
@@ -57,7 +58,7 @@ namespace depth_port_manager
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
             catch (...){
-                _nodeStatus.quality = sonia_common_ros2::msg::NodeStatus::Q_WARN;
+                _nodeStatus.quality = sonia_common_ros2::msg::NodeStatus::Q_DEGRADE;
                 BOOST_LOG_TRIVIAL(info) << "Depth sensor : Failed readDataCheck";
             }
         }// end while
@@ -95,8 +96,7 @@ namespace depth_port_manager
     }
 
     void DepthProvider::publishStatus(){
-        _nodeStatus.node_name = this->get_name();
-        _nodeStatus.stamp = this->get_clock().get()->now();
+        _nodeStatus.stamp = this->now();
         _nodeStatusPublisher->publish(_nodeStatus);
     }
 }  // namespace depth_port_manager

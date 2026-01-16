@@ -20,6 +20,7 @@ The project enables a serial connection with the depth sensor **Impact Subsea IS
 ### Sonia packages
 
 * `sonia_common_cpp`
+* `sonia_common_ros2`
 
 ### External packages
 
@@ -38,12 +39,13 @@ The project enables a serial connection with the depth sensor **Impact Subsea IS
 
 ## Registered Topics / Services / Actions
 
-| Type                             | Name                      | Direction       | Message/Service Type    | Description                                 |
-| -------------------------------- | ------------------------- | ----------------| ----------------------- | ------------------------------------------- |
-| Topic                            | `/provider_depth/depth`   | Published       | `std_msgs/msg/Float32`  | Measured depth data                         |
-| Topic                            | `/provider_depth/press`   | Published       | `std_msgs/msg/Float32`  | Measured pressure data                      |
-| Topic                            | `/provider_depth/temp`    | Published       | `std_msgs/msg/Float32`  | Measured temperature data                   | 
-| Service                          | `/provider_depth/tare`    | Service Server  | `std_srvs/srv/Trigger`  | Resets the depth sensor to current position |
+| Type              | Name                           | Direction       | Message/Service Type                 | Description                                             |
+| ----------------- | ------------------------------ | ----------------| ------------------------------------ | ------------------------------------------------------- |
+| Topic             | `/provider_depth/depth`        | Published       | `std_msgs/msg/Float32`               | Measured depth data                                     |
+| Topic             | `/provider_depth/press`        | Published       | `std_msgs/msg/Float32`               | Measured pressure data                                  |
+| Topic             | `/provider_depth/temp`         | Published       | `std_msgs/msg/Float32`               | Measured temperature data                               |
+| Topic             | `/system_monitor/node_status`  | Published       | `sonia_common_ros2/msg/NodeStatus`   | Message contains information of the state of a node     | 
+| Service           | `/provider_depth/tare`         | Service Server  | `std_srvs/srv/Trigger`               | Resets the depth sensor to current position             |
 
 ---
 ## Build Instructions
