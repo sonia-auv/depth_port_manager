@@ -8,6 +8,8 @@
 #include <std_srvs/srv/trigger.hpp>
 #include <string>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include "depth_port_manager/IDepthDevice.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -42,5 +44,10 @@ namespace depth_port_manager
         rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr _tareSrv;
         static const int BUFFER_SIZE = 4096;
         static const int ID_SIZE = 5;
+
+
+        std::mutex _mtxParser;
+        std::condition_variable _cvReaderParser;
+        sonia_common_cpp::SharedQueue<uint8_t> _parseQueue;
     };
 }  // namespace depth_port_manager
