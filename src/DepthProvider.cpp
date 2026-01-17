@@ -9,10 +9,9 @@ using namespace std::chrono_literals;
 
 namespace depth_port_manager
 {
-    DepthProvider::DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn)
-        : Node("depth_provider"), _device(device), _connection(conn)
+    DepthProvider::DepthProvider(std::shared_ptr<IDepthDevice> device) : Node("depth_provider"), _device(device)
     {
-        //Setting Quality of service policy
+        // Setting Quality of service policy
         rclcpp::QoS qos_pub_info(10);
         qos_pub_info.reliability(rclcpp::ReliabilityPolicy::Reliable);
 
@@ -81,7 +80,7 @@ namespace depth_port_manager
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
         (void)request;
-        _device.Tare([&](std::string data) -> ssize_t { return _connection.Transmit(data); });
+        _device->Tare();
         response->success = true;
         response->message = "Depth Sensor tared";
         BOOST_LOG_TRIVIAL(info) << "Depth Sensor tare completed";
