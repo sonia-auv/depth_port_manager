@@ -40,9 +40,7 @@ namespace depth_port_manager
         while (!_readStopThread)
         {
             try{
-                if (_device.ReadDataCheck(
-                        [&](uint8_t* pData, int offset) -> ssize_t { return _connection.ReadOnce(pData, offset); }, buffer,
-                        BUFFER_SIZE) > 0)
+                if (_device->ReadDataCheck(buffer, BUFFER_SIZE) > 0)
                 {
                     _id1String.push_back((std::string)buffer);
                     _cvReaderParser.notify_all();
@@ -61,7 +59,7 @@ namespace depth_port_manager
         while (!_sendStopThread)
         {
             _cvReaderParser.wait(_lockParser, [&] { return !_id1String.empty(); });
-            DepthData data = _device.ParseData(_id1String.get_n_pop_front());
+            DepthData data = _device->ParseData(_id1String.get_n_pop_front());
 
             std_msgs::msg::Float32 publishData;
 
