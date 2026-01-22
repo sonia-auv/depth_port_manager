@@ -9,10 +9,9 @@ using namespace std::chrono_literals;
 
 namespace depth_port_manager
 {
-    DepthProvider::DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn)
-        : Node("depth_provider"), _device(device), _connection(conn)
+    DepthProvider::DepthProvider(std::shared_ptr<IDepthDevice> device) : Node("depth_provider"), _device(device)
     {
-        //Setting Quality of service policy
+        // Setting Quality of service policy
         rclcpp::QoS qos_pub_info(10);
         qos_pub_info.reliability(rclcpp::ReliabilityPolicy::Reliable);
 
@@ -47,9 +46,7 @@ namespace depth_port_manager
         while (!_readStopThread)
         {
             try{
-                if (_device.ReadDataCheck(
-                        [&](uint8_t* pData, int offset) -> ssize_t { return _connection.ReadOnce(pData, offset); }, buffer,
-                        BUFFER_SIZE) > 0)
+                if (_device->ReadDataCheck(buffer, BUFFER_SIZE) > 0)
                 {
                     _id1String.push_back((std::string)buffer);
                     _cvReaderParser.notify_all();
@@ -70,7 +67,7 @@ namespace depth_port_manager
         while (!_sendStopThread)
         {
             _cvReaderParser.wait(_lockParser, [&] { return !_id1String.empty(); });
-            DepthData data = _device.ParseData(_id1String.get_n_pop_front());
+            DepthData data = _device->ParseData(_id1String.get_n_pop_front());
 
             std_msgs::msg::Float32 publishData;
 
@@ -89,7 +86,7 @@ namespace depth_port_manager
                              std::shared_ptr<std_srvs::srv::Trigger::Response> response)
     {
         (void)request;
-        _device.Tare([&](std::string data) -> ssize_t { return _connection.Transmit(data); });
+        _device->Tare();
         response->success = true;
         response->message = "Depth Sensor tared";
         BOOST_LOG_TRIVIAL(info) << "Depth Sensor tare completed";

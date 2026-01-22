@@ -19,7 +19,7 @@ namespace depth_port_manager
     class DepthProvider : public rclcpp::Node
     {
         public:
-        DepthProvider(IDepthDevice& device, sonia_common_cpp::SerialConn& conn);
+        DepthProvider(std::shared_ptr<IDepthDevice> device);
         ~DepthProvider();
 
         private:
@@ -29,7 +29,7 @@ namespace depth_port_manager
         void tare(std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                   std::shared_ptr<std_srvs::srv::Trigger::Response> response);
 
-        IDepthDevice& _device;
+        std::shared_ptr<IDepthDevice> _device;
 
         sonia_common_cpp::SharedQueue<std::string> _id1String;
 
@@ -38,9 +38,6 @@ namespace depth_port_manager
 
         bool _sendStopThread = false;
         std::thread _sendThread;
-
-
-        sonia_common_cpp::SerialConn& _connection;
 
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _depthPublisher;
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr _pressPublisher;
