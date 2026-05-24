@@ -3,6 +3,9 @@
 #include <memory>
 
 #include "depth_port_manager/IDepthDevice.hpp"
+
+#include "sonia_common_cpp/SerialConn.hpp"
+
 namespace depth_port_manager
 {
     class ImpactSubsea : public IDepthDevice

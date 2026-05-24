@@ -18,9 +18,9 @@ namespace depth_port_manager
 
     int ImpactSubsea::ReadDataCheck(char buffer[], int bufferSize)
     {
-        sonia_common_cpp::SerialTram tram;
-        tram.size = 1;
-        _conn->Read(tram);
+        std::shared_ptr<sonia_common_cpp::SerialConn> conn = std::dynamic_pointer_cast<sonia_common_cpp::SerialConn>(_conn);
+        conn->ReadOnce((uint8_t *)buffer, 0);
+
         if (buffer[0] != '$')
         {
             return 0;
@@ -29,8 +29,7 @@ namespace depth_port_manager
 
         for (index = 1; buffer[index - 1] != '\n' && index < bufferSize; index++)
         {
-            tram.offset = index;
-            _conn->Read(tram);
+            conn->ReadOnce((uint8_t *)buffer, index);
         }
 
         if (index >= bufferSize)
@@ -38,7 +37,6 @@ namespace depth_port_manager
             return -1;
         }
 
-        buffer = (char *)tram.data.data();
         buffer[index] = 0;
 
         if (strncmp(&buffer[1], ImpactSubsea::ID1.c_str(), ImpactSubsea::ID_SIZE) == 0)  // Add checksum verification
